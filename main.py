@@ -1,8 +1,21 @@
 from langchain.agents import initialize_agent, AgentType
-from langchain.llms import OpenAI
+from langchain_core.language_models.chat_models import SimpleChatModel
+from langchain_core.messages import AIMessage, HumanMessage
 from tools import TOOLS
 
-llm = OpenAI(temperature=0)  # Simulación, no se usará si estás mockeando solo
+
+class DummyLLM(SimpleChatModel):
+    def _call(self, messages, stop=None, **kwargs):
+        # Extrae el último mensaje del usuario
+        last_user_input = [m.content for m in messages if isinstance(m, HumanMessage)][-1]
+        return AIMessage(content=f"[Respuesta simulada a]: {last_user_input}")
+
+    @property
+    def _llm_type(self) -> str:
+        return "dummy-chat"
+
+
+llm = DummyLLM()
 
 agent = initialize_agent(
     tools=TOOLS,
