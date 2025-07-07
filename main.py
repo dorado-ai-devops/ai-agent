@@ -1,19 +1,24 @@
 from langchain.agents import initialize_agent, AgentType
 from langchain_core.language_models.chat_models import SimpleChatModel
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from tools import TOOLS
-
 
 class DummyLLM(SimpleChatModel):
     def _call(self, messages, stop=None, **kwargs):
-        # Extrae el último mensaje del usuario
-        last_user_input = [m.content for m in messages if isinstance(m, HumanMessage)][-1]
-        return AIMessage(content=f"[Respuesta simulada a]: {last_user_input}")
+        # HumanMessage más reciente = prompt del agente (incluye “Question: …”)
+        raw = [m.content for m in messages if isinstance(m, HumanMessage)][-1]
+        # solo la parte que sigue a “Question:”
+        user_query = raw.split("Question:")[-1].split("\n")[0].strip()
+
+        return (
+            "Thought: Necesito usar una herramienta.\n"
+            "Action: LogAnalyzerTool\n"
+            f"Action Input: {user_query}"
+        )
 
     @property
-    def _llm_type(self) -> str:
+    def _llm_type(self):
         return "dummy-chat"
-
 
 llm = DummyLLM()
 
@@ -27,7 +32,6 @@ agent = initialize_agent(
 if __name__ == "__main__":
     while True:
         user_input = input("¿Qué necesitas? > ")
-        if user_input.lower() in ["exit", "quit"]:
+        if user_input.lower() in {"exit", "quit"}:
             break
-        result = agent.run(user_input)
-        print(result)
+        print(agent.invoke({"input": user_input})["output"])
