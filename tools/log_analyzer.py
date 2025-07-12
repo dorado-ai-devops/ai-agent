@@ -1,4 +1,4 @@
-from langchain.tools import Tool
+from langchain_core.tools import Tool
 from clients.gateway_client import MockGatewayClient
 
 client = MockGatewayClient()
