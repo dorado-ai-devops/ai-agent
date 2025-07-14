@@ -1,5 +1,5 @@
 IMAGE_NAME=ai-agent
-VERSION=v0.3.17
+VERSION=v0.3.18
 CLUSTER_NAME=devops-ai
 REGISTRY=localhost:5000
 HELM_VALUES=../devops-ai-lab/manifests/helm-agent/values.yaml
@@ -31,4 +31,4 @@ release: build load update-values sync
 	@echo "Release completo: $(IMAGE_NAME):$(VERSION) desplegado y sincronizado con ArgoCD."
 
 run:
-	docker run -p 5001:5001 $(IMAGE_NAME):$(VERSION)
+	docker run -p 6001:6001 $(IMAGE_NAME):$(VERSION)
