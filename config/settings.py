@@ -1,1 +1,1 @@
-GATEWAY_URL = "http://localhost:5000"
+GATEWAY_URL = "http://localhost:5002"
