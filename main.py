@@ -12,7 +12,7 @@ async def main():
         agent=AgentType.OPENAI_FUNCTIONS,
         verbose=True
     )
-    result = await agent.ainvoke("Genera un pipeline básico con test.")
+    result = await agent.ainvoke("Genera un pipeline básico usando ollama con la descripción: 'Construir y desplegar una aplicación web simple'.")
     print(result["output"])
 
 if __name__ == "__main__":
