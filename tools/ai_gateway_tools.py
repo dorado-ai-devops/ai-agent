@@ -57,7 +57,16 @@ class LintChartInput(BaseModel):
 
 @tool("lint_chart")
 async def lint_chart_tool(input: LintChartInput) -> str:
-    """Realiza linting de un Helm Chart .tgz usando el microservicio de IA."""
+    """
+    Realiza linting de un Helm Chart comprimido (.tgz) usando el microservicio de IA.
+
+    Parámetros:
+    - chart_path: Ruta absoluta del archivo .tgz (debe existir en el filesystem del contenedor).
+    - chart_name: Nombre del chart.
+
+    Ejemplo de uso:
+    "Haz lint del Helm Chart que está en /app/chart_example/helm-log-analyzer-0.1.5.tgz y cuyo nombre es helm-log-analyzer."
+    """
     data = aiohttp.FormData()
     data.add_field("chart", open(input.chart_path, "rb"), filename=input.chart_path, content_type='application/gzip')
     data.add_field("mode", "ollama")  # <-- Siempre fijo

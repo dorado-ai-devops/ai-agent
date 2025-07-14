@@ -44,18 +44,19 @@ async def main():
         logging.error(f"[AGENT ERROR logs] run_id={run_id} {e}")
         raise
 
-    # 3. Linting de Helm Chart (llamada directa a la tool)
+       # 3. Linting de Helm Chart (llamada directa a la tool)
     chart_path = "/app/chart_example/helm-log-analyzer-0.1.5.tgz"
     chart_name = "helm-log-analyzer"
     logging.info(f"[AGENT PROMPT] run_id={run_id} chart_path={chart_path}")
     try:
         lint_input = LintChartInput(chart_path=chart_path, chart_name=chart_name)
-        result_lint = await lint_chart_tool(lint_input)
+        result_lint = await lint_chart_tool.ainvoke(lint_input.model_dump())
         logging.info(f"[AGENT RESULT] run_id={run_id} output={result_lint}")
         print("Lint chart output:", result_lint)
     except Exception as e:
         logging.error(f"[AGENT ERROR lint_chart] run_id={run_id} {e}")
         raise
+
 
     logging.info(f"[AGENT RUN END] run_id={run_id}")
 
