@@ -1,5 +1,9 @@
-from .log_analyzer import log_analyzer_tool
+# ai-agent/__init__.py
 
-TOOLS = [
-    log_analyzer_tool
+from .ai_gateway_tools import generate_pipeline_tool, analyze_log_tool, lint_chart_tool
+
+tools = [
+    generate_pipeline_tool,
+    analyze_log_tool,
+    lint_chart_tool
 ]
