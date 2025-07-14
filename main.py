@@ -5,6 +5,9 @@ from langchain_openai import ChatOpenAI
 from tools import tools
 import asyncio
 
+# Importa la tool y el input concreto (no uses prompt natural para esto)
+from tools.ai_gateway_tools import lint_chart_tool, LintChartInput
+
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 async def main():
@@ -39,6 +42,19 @@ async def main():
         print("Log analysis output:", result_logs["output"])
     except Exception as e:
         logging.error(f"[AGENT ERROR logs] run_id={run_id} {e}")
+        raise
+
+    # 3. Linting de Helm Chart (llamada directa a la tool)
+    chart_path = "/app/chart_example/helm-log-analyzer-0.1.5.tgz"
+    chart_name = "helm-log-analyzer"
+    logging.info(f"[AGENT PROMPT] run_id={run_id} chart_path={chart_path}")
+    try:
+        lint_input = LintChartInput(chart_path=chart_path, chart_name=chart_name)
+        result_lint = await lint_chart_tool(lint_input)
+        logging.info(f"[AGENT RESULT] run_id={run_id} output={result_lint}")
+        print("Lint chart output:", result_lint)
+    except Exception as e:
+        logging.error(f"[AGENT ERROR lint_chart] run_id={run_id} {e}")
         raise
 
     logging.info(f"[AGENT RUN END] run_id={run_id}")
