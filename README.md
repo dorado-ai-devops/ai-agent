@@ -21,8 +21,7 @@ El agente combina múltiples herramientas como funciones invocables desde lengua
 | `LogAnalyzerTool` | `ai-logs-analyze`     | Diagnóstico de logs CI/CD con LLM |
 | `HelmLinterTool`  | `ai-helm-linter`      | Validación semántica de charts Helm |
 | `PipelineGenTool` | `ai-pipeline-gen`     | Generación de Jenkinsfile desde texto |
-| `OllamaTool`    | `ai-agent-ollama`      | Consultas generales al LLM |
-| `FlanTool`       | `ai-agent-flan`      | Tool para razonamiento con modelo fine-tuneado |
+
 
 ---
 
@@ -33,11 +32,7 @@ ai-agent/
 ├── main.py                       # Entry point: ejecuta el agente LangChain
 ├── tools/
 │   ├── __init__.py
-│   ├── log_analyzer.py
-│   ├── helm_linter.py
-│   ├── pipeline_gen.py
-│   ├── query_ollama.py
-│   └── query_flan.py
+│   ├── ai_gateway_tools.py
 ├── clients/
 │   └── gateway_client.py
 ├── config/
