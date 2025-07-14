@@ -7,7 +7,7 @@ GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
 # --- TOOL 1: generate-pipeline ---
 class GeneratePipelineInput(BaseModel):
     description: str = Field(..., description="Breve descripción del pipeline")
-    mode: str = Field(..., description="Motor de IA: openai u ollama")
+    mode: str = Field("ollama", description="Motor de IA: openai u ollama")
 
 @tool("generate_pipeline")
 async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
