@@ -1,28 +1,30 @@
 # 🧠 ai-agent
 
-Agente IA razonador construido con LangChain. Orquesta tareas complejas de DevOps mediante razonamiento simbólico e invocación modular de herramientas IA ya existentes en el ecosistema `devops-ai-lab`.
+Agente IA razonador construido con **LangChain** + **OpenAI** (GPT-4).\
+Orquesta tareas complejas de DevOps mediante razonamiento LLM y llamada modular a herramientas IA propias del ecosistema `devops-ai-lab`.
 
 ---
 
 ## 🎯 Propósito
 
-Centraliza la lógica de razonamiento y decisión basada en LLMs, encapsulando como herramientas (`tools`) los microservicios IA accesibles vía `ai-gateway`. Permite analizar logs, validar charts, generar pipelines y realizar consultas libres desde un único punto de entrada cognitivo.
+Centraliza la lógica de decisión y automatización DevOps basada en LLMs, encapsulando como **tools** los microservicios IA accesibles vía `ai-gateway`.\
+Permite analizar logs, validar charts Helm y generar Jenkinsfiles de forma unificada, añadiendo trazabilidad y observabilidad avanzada (MCP).
 
-Este componente marca el inicio de la capa de inteligencia real en la arquitectura.
+Este agente es la entrada cognitiva real de la arquitectura.
 
 ---
 
 ## 🔧 Funcionalidad
 
-El agente combina múltiples herramientas como funciones invocables desde lenguaje natural. Cada tool actúa como wrapper HTTP a uno de los siguientes endpoints:
+El agente expone varias **tools** que actúan como wrappers HTTP a microservicios IA desplegados en Kubernetes:
 
-| Tool              | Microservicio        | Descripción |
-|------------------|----------------------|-------------|
-| `LogAnalyzerTool` | `ai-logs-analyze`     | Diagnóstico de logs CI/CD con LLM |
-| `HelmLinterTool`  | `ai-helm-linter`      | Validación semántica de charts Helm |
-| `PipelineGenTool` | `ai-pipeline-gen`     | Generación de Jenkinsfile desde texto |
-| `OllamaTool`    | `ai-agent-ollama`      | Consultas generales al LLM |
-| `FlanTool`       | `ai-agent-flan`      | Tool para razonamiento con modelo fine-tuneado |
+| Tool                | Endpoint Gateway     | Descripción                                                        |
+| ------------------- | -------------------- | ------------------------------------------------------------------ |
+| `generate_pipeline` | `/generate-pipeline` | Genera Jenkinsfile a partir de una descripción en lenguaje natural |
+| `analyze_log`       | `/analyze-log`       | Diagnóstico y solución de logs Jenkins/CI vía LLM                  |
+| `lint_chart`        | `/lint-chart`        | Linting semántico de Helm Charts comprimidos (.tgz)                |
+
+Todas las tools inyectan el campo `caller: ai-agent-langchain` en el payload para trazabilidad.
 
 ---
 
@@ -30,16 +32,14 @@ El agente combina múltiples herramientas como funciones invocables desde lengua
 
 ```
 ai-agent/
-├── main.py                       # Entry point: ejecuta el agente LangChain
+├── main.py                         # Entry point: ejecuta el agente LangChain y orquesta las tools
 ├── tools/
 │   ├── __init__.py
-│   ├── log_analyzer.py
-│   ├── helm_linter.py
-│   ├── pipeline_gen.py
-│   ├── query_ollama.py
-│   └── query_flan.py
+│   ├── ai_gateway_tools.py         # Definición y lógica HTTP de cada tool
 ├── clients/
-│   └── gateway_client.py
+│   └── gateway_client.py           # (opcional, para lógica extendida de cliente HTTP)
+├── chart_example/
+│   └── helm-log-analyzer-0.1.5.tgz # Chart de ejemplo para pruebas de linting
 ├── config/
 │   └── settings.py
 ├── prompts/
@@ -60,64 +60,64 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Interactuar vía CLI directamente con el agente:
-
-```
-> ¿Qué necesitas? > Diagnostica este log: (...)
-> Resultado: Parece un error de volumen persistente en tu pod de Kubernetes...
-```
+Puedes interactuar con el agente vía CLI, o modificar el main para ejecutar pruebas directas sobre las tools.
 
 ---
 
 ## 🌐 Comunicación con el entorno
 
-El agente se conecta a `ai-gateway` para acceder a las herramientas IA existentes. Los endpoints utilizados son:
+El agente se comunica con `ai-gateway` mediante peticiones HTTP internas (Kubernetes service).\
+Endpoints activos:
 
+- `POST /generate-pipeline`
 - `POST /analyze-log`
 - `POST /lint-chart`
-- `POST /generate-pipeline`
-- `POST /query-ollama`
-- `POST /query-flan`
 
-(Ver configuración en `config/settings.py`)
+Todos los prompts, respuestas y eventos son registrados por el gateway en disco y auditados vía mensajes MCP.
 
 ---
 
 ## 🧠 Inteligencia y Modelos
 
-- Modelo principal: `Mistral` vía Ollama
-- Soporte para OpenAI (fallback opcional)
-- Soporte futuro: LLM fine-tuneado (FlanT5)
+- **Modelo por defecto:** OpenAI GPT-4 (puedes adaptar a Mistral/Ollama modificando la config y el microservicio backend).
+- Todas las llamadas tools fijan el motor a `ollama` por defecto, pero es configurable.
+- Futuro: integración de modelo fine-tuneado propio (`flan-t5` u otros).
 
 ---
 
-## 📦 Dependencias
+## 🔎 Observabilidad y Trazabilidad
+
+- **Logs** detallados en cada paso (inicio, input, resultado, error) en stdout (visible en pods Kubernetes).
+- **MCP**: Cada ejecución relevante es registrada por `ai-gateway` mediante mensajes MCP, incluyendo metadata (caller, paths, microservicio, etc).
+
+---
+
+## 📦 Dependencias principales
 
 ```text
 langchain
-requests
+openai
+aiohttp
+pydantic
 python-dotenv
-ollama-client  # si se usa cliente específico
 ```
 
 ---
 
 ## 📌 Estado actual
 
-- [x] Estructura del agente definida
-- [ ] Tools implementadas (en progreso)
-- [ ] CLI operativa
-- [ ] Integración completa con `ai-gateway`
-- [ ] Orquestación simbólica multi-tool
+-
 
 ---
 
 ## 👨‍💻 Autor
 
-**Dani** – [@dorado-ai-devops](https://github.com/dorado-ai-devops)
+**Dani**\
+[github.com/dorado-ai-devops](https://github.com/dorado-ai-devops)
 
 ---
 
 ## 🛡 Licencia
 
 Licencia Pública General GNU v3.0
+
