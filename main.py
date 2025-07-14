@@ -10,7 +10,8 @@ async def main():
         tools=tools,
         llm=llm,
         agent=AgentType.OPENAI_FUNCTIONS,
-        verbose=True
+        verbose=True,
+        max_iterations=1
     )
     result = await agent.ainvoke("Genera un pipeline básico usando ollama con la descripción: 'Construir y desplegar una aplicación web simple'.")
     print(result["output"])
