@@ -7,7 +7,7 @@ GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
 # --- TOOL 1: generate-pipeline ---
 class GeneratePipelineInput(BaseModel):
     description: str = Field(..., description="Breve descripción del pipeline")
-    # No incluyas 'mode'
+
 
 @tool("generate_pipeline")
 async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
@@ -23,7 +23,7 @@ async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
 # --- TOOL 2: analyze-log ---
 class AnalyzeLogInput(BaseModel):
     log: str = Field(..., description="Contenido completo del log")
-    # No incluyas 'mode'
+
 
 @tool("analyze_log")
 async def analyze_log_tool(input: AnalyzeLogInput) -> str:
@@ -40,7 +40,6 @@ async def analyze_log_tool(input: AnalyzeLogInput) -> str:
 class LintChartInput(BaseModel):
     chart_path: str = Field(..., description="Ruta local al .tgz del Helm Chart")
     chart_name: str = "unknown"
-    # No incluyas 'mode'
 
 @tool("lint_chart")
 async def lint_chart_tool(input: LintChartInput) -> str:
