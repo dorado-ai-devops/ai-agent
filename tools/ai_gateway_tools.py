@@ -5,6 +5,11 @@ import logging
 
 GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+
 # --- TOOL 1: generate-pipeline ---
 class GeneratePipelineInput(BaseModel):
     description: str = Field(..., description="Breve descripción del pipeline")
