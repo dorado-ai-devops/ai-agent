@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 6001
 
-CMD ["python", "server/server.py"]
+CMD ["python", "server.py"]
