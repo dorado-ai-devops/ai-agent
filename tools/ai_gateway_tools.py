@@ -1,6 +1,7 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 import aiohttp
+import logging
 
 GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
 
@@ -11,15 +12,20 @@ class GeneratePipelineInput(BaseModel):
 
 @tool("generate_pipeline")
 async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
-    """Genera un Jenkinsfile a partir de una descripción usando el microservicio de IA."""
+    logging.info(f"[TOOL CALL] Tool=generate_pipeline input={input}")
     payload = {
         "description": input.description,
-        "mode": "ollama"  # <-- Siempre fijo
+        "mode": "ollama"
     }
-    async with aiohttp.ClientSession() as session:
-        async with session.post(f"{GATEWAY_URL}/generate-pipeline", json=payload) as resp:
-            return await resp.text()
-
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{GATEWAY_URL}/generate-pipeline", json=payload) as resp:
+                result = await resp.text()
+        logging.info(f"[TOOL RESULT] Tool=generate_pipeline output={result}")
+        return result
+    except Exception as e:
+        logging.error(f"[TOOL ERROR] Tool=generate_pipeline {e}")
+        raise
 # --- TOOL 2: analyze-log ---
 class AnalyzeLogInput(BaseModel):
     log: str = Field(..., description="Contenido completo del log")
