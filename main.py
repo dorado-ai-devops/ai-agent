@@ -17,15 +17,31 @@ async def main():
         verbose=True,
         max_iterations=1
     )
-    prompt = "Genera un pipeline básico usando ollama con la descripción: 'Construir y desplegar una aplicación web simple'."
-    logging.info(f"[AGENT PROMPT] run_id={run_id} prompt={prompt}")
+
+    # 1. Generación de pipelines
+    prompt_pipeline = "Genera un pipeline básico usando ollama con la descripción: 'Construir y desplegar una aplicación web simple'."
+    logging.info(f"[AGENT PROMPT] run_id={run_id} prompt={prompt_pipeline}")
     try:
-        result = await agent.ainvoke(prompt)
-        logging.info(f"[AGENT RESULT] run_id={run_id} output={result['output']}")
-        print(result["output"])
+        result_pipeline = await agent.ainvoke(prompt_pipeline)
+        logging.info(f"[AGENT RESULT] run_id={run_id} output={result_pipeline['output']}")
+        print("Pipeline output:", result_pipeline["output"])
     except Exception as e:
-        logging.error(f"[AGENT ERROR] run_id={run_id} {e}")
+        logging.error(f"[AGENT ERROR pipeline] run_id={run_id} {e}")
         raise
+
+    # 2. Análisis de logs 
+    log_contenido = "[2025-07-05] ERROR: something exploded"
+    prompt_logs = f"Analiza el siguiente log de Jenkins y proporciona diagnóstico y solución:\n{log_contenido}"
+    logging.info(f"[AGENT PROMPT] run_id={run_id} prompt={prompt_logs}")
+    try:
+        result_logs = await agent.ainvoke(prompt_logs)
+        logging.info(f"[AGENT RESULT] run_id={run_id} output={result_logs['output']}")
+        print("Log analysis output:", result_logs["output"])
+    except Exception as e:
+        logging.error(f"[AGENT ERROR logs] run_id={run_id} {e}")
+        raise
+
+    logging.info(f"[AGENT RUN END] run_id={run_id}")
 
 if __name__ == "__main__":
     asyncio.run(main())
