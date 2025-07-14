@@ -5,6 +5,11 @@ import logging
 
 GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+
 # --- TOOL 1: generate-pipeline ---
 class GeneratePipelineInput(BaseModel):
     description: str = Field(..., description="Breve descripción del pipeline")
@@ -16,7 +21,8 @@ async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
     logging.info(f"[TOOL CALL] Tool=generate_pipeline input={input}")
     payload = {
         "description": input.description,
-        "mode": "ollama"
+        "mode": "ollama",
+        "caller": "ai-agent-langchain"
     }
     try:
         async with aiohttp.ClientSession() as session:
@@ -37,7 +43,8 @@ async def analyze_log_tool(input: AnalyzeLogInput) -> str:
     """Analiza un log de Jenkins y devuelve un diagnóstico generado por IA."""
     payload = {
         "log": input.log,
-        "mode": "ollama"  # <-- Siempre fijo
+        "mode": "ollama",
+        "caller": "ai-agent-langchain"
     }
     async with aiohttp.ClientSession() as session:
         async with session.post(f"{GATEWAY_URL}/analyze-log", json=payload) as resp:
@@ -55,6 +62,7 @@ async def lint_chart_tool(input: LintChartInput) -> str:
     data.add_field("chart", open(input.chart_path, "rb"), filename=input.chart_path, content_type='application/gzip')
     data.add_field("mode", "ollama")  # <-- Siempre fijo
     data.add_field("chart_name", input.chart_name)
+    data.add_field("caller", "ai-agent-langchain")
     async with aiohttp.ClientSession() as session:
         async with session.post(f"{GATEWAY_URL}/lint-chart", data=data) as resp:
             return await resp.text()
