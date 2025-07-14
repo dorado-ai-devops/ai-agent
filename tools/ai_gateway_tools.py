@@ -12,6 +12,7 @@ class GeneratePipelineInput(BaseModel):
 
 @tool("generate_pipeline")
 async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
+    """Genera un Jenkinsfile a partir de una descripción usando el microservicio de IA."""
     logging.info(f"[TOOL CALL] Tool=generate_pipeline input={input}")
     payload = {
         "description": input.description,
