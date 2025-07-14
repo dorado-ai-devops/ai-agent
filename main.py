@@ -5,9 +5,6 @@ from langchain_openai import ChatOpenAI
 from tools import tools
 import asyncio
 
-# Importa la tool y el input concreto (no uses prompt natural para esto)
-from tools.ai_gateway_tools import lint_chart_tool, LintChartInput
-
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 async def main():
@@ -22,7 +19,7 @@ async def main():
     )
 
     # 1. Generación de pipelines
-    prompt_pipeline = "Genera un pipeline básico usando ollama con la descripción: 'Construir y desplegar una aplicación web simple'."
+    prompt_pipeline = "Genera un pipeline de Jenkins básico usandocon la descripción: 'Construir y desplegar una aplicación web simple'. Devuelve solo el texto del Jenkinsfile."
     logging.info(f"[AGENT PROMPT] run_id={run_id} prompt={prompt_pipeline}")
     try:
         result_pipeline = await agent.ainvoke(prompt_pipeline)
@@ -44,19 +41,19 @@ async def main():
         logging.error(f"[AGENT ERROR logs] run_id={run_id} {e}")
         raise
 
-       # 3. Linting de Helm Chart (llamada directa a la tool)
-    chart_path = "/app/chart_example/helm-log-analyzer-0.1.5.tgz"
-    chart_name = "helm-log-analyzer"
-    logging.info(f"[AGENT PROMPT] run_id={run_id} chart_path={chart_path}")
+    # 3. Linting de Helm Chart (vía prompt natural)
+    prompt_lint = (
+        "Haz lint del Helm Chart comprimido que está en /app/chart_example/helm-log-analyzer-0.1.5.tgz "
+        "y cuyo nombre es helm-log-analyzer."
+    )
+    logging.info(f"[AGENT PROMPT] run_id={run_id} prompt={prompt_lint}")
     try:
-        lint_input = LintChartInput(chart_path=chart_path, chart_name=chart_name)
-        result_lint = await lint_chart_tool.ainvoke(lint_input.model_dump())
-        logging.info(f"[AGENT RESULT] run_id={run_id} output={result_lint}")
-        print("Lint chart output:", result_lint)
+        result_lint = await agent.ainvoke(prompt_lint)
+        logging.info(f"[AGENT RESULT] run_id={run_id} output={result_lint['output']}")
+        print("Lint chart output:", result_lint["output"])
     except Exception as e:
         logging.error(f"[AGENT ERROR lint_chart] run_id={run_id} {e}")
         raise
-
 
     logging.info(f"[AGENT RUN END] run_id={run_id}")
 

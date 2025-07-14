@@ -21,7 +21,7 @@ async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
     logging.info(f"[TOOL CALL] Tool=generate_pipeline input={input}")
     payload = {
         "description": input.description,
-        "mode": "ollama",
+        "mode": "openai",
         "caller": "ai-agent-langchain"
     }
     try:
@@ -43,7 +43,7 @@ async def analyze_log_tool(input: AnalyzeLogInput) -> str:
     """Analiza un log de Jenkins y devuelve un diagnóstico generado por IA."""
     payload = {
         "log": input.log,
-        "mode": "ollama",
+        "mode": "openai",
         "caller": "ai-agent-langchain"
     }
     async with aiohttp.ClientSession() as session:
@@ -65,11 +65,11 @@ async def lint_chart_tool(input: LintChartInput) -> str:
     - chart_name: Nombre del chart.
 
     Ejemplo de uso:
-    "Haz lint del Helm Chart que está en /app/chart_example/helm-log-analyzer-0.1.5.tgz y cuyo nombre es helm-log-analyzer."
+    "Haz lint del Helm Chart que está en /app/chart_example/helm-chart-example.tgz y cuyo nombre es helm-chart-example."
     """
     data = aiohttp.FormData()
     data.add_field("chart", open(input.chart_path, "rb"), filename=input.chart_path, content_type='application/gzip')
-    data.add_field("mode", "ollama")  # <-- Siempre fijo
+    data.add_field("mode", "openai")  # <-- Siempre fijo
     data.add_field("chart_name", input.chart_name)
     data.add_field("caller", "ai-agent-langchain")
     async with aiohttp.ClientSession() as session:
