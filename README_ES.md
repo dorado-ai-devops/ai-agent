@@ -143,3 +143,48 @@ python-dotenv
 ## 🛡 Licencia
 
 Licencia Pública General GNU v3.0
+
+
+# Descripción de la infraestructura `DEVOPS-Agent-LAB`
+
+`DEVOPS-Agent-LAB` es una infraestructura modular orientada a automatizar tareas DevOps mediante agentes de lenguaje (`LangChain`) integrados con herramientas personalizadas y capacidades de razonamiento sobre código, logs, y despliegues. El sistema opera en un entorno GitOps (ArgoCD + Kubernetes) y ofrece una experiencia unificada para usuarios humanos, pipelines de CI/CD y agentes LLM.
+
+## Componentes principales
+
+### 1. Entrada natural (AI-CHAT-UI)
+Interfaz de lenguaje natural que permite a usuarios humanos interactuar con el agente mediante texto libre.
+
+### 2. Razón y orquestación (ai-agent / LangChain)
+Núcleo cognitivo del sistema. Utiliza LangChain para decidir qué herramientas ejecutar, en qué orden, y con qué contexto. Este agente dispone de herramientas registradas como:
+
+- `generate_pipeline`
+- `analyze_log`
+- `lint_chart`
+- `query_vector_db`
+- `analyze_helm_chart`
+- `list_github_repos`
+
+### 3. Base de contexto (ai-vector-db / Chroma)
+Vector DB que almacena documentos técnicos como código, manifiestos de despliegue o logs anteriores. El agente consulta esta base para obtener contexto relevante y enriquecer su razonamiento.
+
+### 4. Herramientas externas personalizadas (EXTERNAL-CUSTOM-TOOLS)
+Conjunto de microservicios desplegados en Flask:
+
+- `ai-gateway`: intermediario HTTP para adaptadores externos
+- `ai-logs-analyze`: analiza logs CI/CD
+- `ai-helm-linter`: valida charts Helm
+- `ai-pipeline-gen`: genera Jenkinsfiles desde descripciones
+
+Estas tools pueden trabajar con modelos locales vía `ollama` (ej. Mistral 7B) o con APIs externas como OpenAI si se activa el fallback.
+
+### 5. Integración con Jenkins
+Jenkins actúa como emisor de tareas para el agente (`/agentquery`) y también como consumidor de los resultados generados por herramientas del sistema.
+
+### 6. Observabilidad y feedback (FastAPI MCP + Streamlit)
+- `ai-mcp-server`: almacena y publica mensajes y eventos en formato estructurado
+- `streamlit`: interfaz de visualización para monitorear respuestas, outputs del LLM y estado general del sistema
+- Persistencia: los outputs se almacenan en volúmenes `/mnt/data/gateway` y `/mnt/data/mcp` según origen
+
+### 7. Despliegue GitOps (Kubernetes + ArgoCD)
+Todos los componentes son desplegados mediante manifiestos Git y gestionados con ArgoCD sobre Kubernetes.
+
