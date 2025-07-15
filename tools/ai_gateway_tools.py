@@ -4,7 +4,7 @@ import aiohttp
 import logging
 
 GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
-AI_VENDOR = "openai"
+AI_VENDOR = "ollama"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,7 +18,9 @@ class GeneratePipelineInput(BaseModel):
 
 @tool("generate_pipeline")
 async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
-    """Genera un Jenkinsfile a partir de una descripción usando el microservicio de IA."""
+    """Genera un Jenkinsfile a partir de una descripción usando el microservicio ai-pipeline-gen.
+    Devuelve solo el texto del Jenkinsfile generado.
+    """
     logging.info(f"[TOOL CALL] Tool=generate_pipeline input={input}")
     payload = {
         "description": input.description,
@@ -34,7 +36,7 @@ async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
     except Exception as e:
         logging.error(f"[TOOL ERROR] Tool=generate_pipeline {e}")
         raise
-    
+
 # --- TOOL 2: analyze-log ---
 class AnalyzeLogInput(BaseModel):
     log: str = Field(..., description="Contenido completo del log")
@@ -60,14 +62,15 @@ class LintChartInput(BaseModel):
 @tool("lint_chart")
 async def lint_chart_tool(input: LintChartInput) -> str:
     """
-    Realiza linting de un Helm Chart comprimido (.tgz) usando el microservicio de IA.
+    Realiza linting de un Helm Chart comprimido (.tgz) usando el microservicio de linting.
+    Describe la funcion del chart e infiere lo que hace, da un pequeño breakdown de su contenido.
 
     Parámetros:
     - chart_path: Ruta absoluta del archivo .tgz (debe existir en el filesystem del contenedor).
     - chart_name: Nombre del chart.
 
     Ejemplo de uso:
-    "Haz lint del Helm Chart que está en /app/chart_example/helm-chart-example.tgz y cuyo nombre es helm-chart-example."
+    "Haz lint del Helm Chart que está en /app/chart_example/helm-chart-example.tgz y cuyo nombre es helm-chart-example, además describelo brevemente."
     """
     data = aiohttp.FormData()
     data.add_field("chart", open(input.chart_path, "rb"), filename=input.chart_path, content_type='application/gzip')

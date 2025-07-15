@@ -14,6 +14,13 @@ logging.basicConfig(
 async def analyze_helm_chart(query: str, branch: str = "main") -> str:
     """
     Descarga y comprime un Helm Chart del repo, y ejecuta el lint automáticamente.
+    Describe el chart a analizar (ej: 'dorado-ai-devops/ai-agent') y la rama (default: 'main').
+    Retorna el resultado del fetch y el lint.
+    Si el chart no se encuentra o hay un error al comprimir, retorna un mensaje de error.
+    Si hay múltiples charts que coinciden, solicita especificar mejor el nombre.
+    Si el chart se encuentra, lo comprime y ejecuta el lint.
+    Ejemplo de uso:
+    analyze_helm_chart("dorado-ai-devops/ai-agent", "main")     
     """
     logging.info(f"[TOOL CALL] analyze_helm_chart query={query} branch={branch}")
     fetch_result = fetch_helm_chart_helper(query, branch)
