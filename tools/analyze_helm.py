@@ -3,6 +3,7 @@ import os
 import logging
 from .helpers import fetch_helm_chart_helper
 from .ai_gateway_tools import lint_chart_tool
+from tools.ai_gateway_tools import LintChartInput
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,11 +26,9 @@ async def analyze_helm_chart(query: str, branch: str = "main") -> str:
         chart_path = fetch_result.split("comprimido en:")[-1].strip().replace("'", "")
         chart_name = os.path.basename(chart_path).replace(".tar.gz", "")
 
-        # LLAMA A LA TOOL USANDO await .ainvoke() (async)
-        lint_result = await lint_chart_tool.ainvoke({
-            "chart_path": chart_path,
-            "chart_name": chart_name
-        })
+ 
+        lint_input = LintChartInput(chart_path=chart_path, chart_name=chart_name)
+        lint_result = await lint_chart_tool.ainvoke(lint_input)
 
         logging.info(f"[TOOL RESULT] Lint completado para {chart_name}: {lint_result}")
         return (
