@@ -27,8 +27,10 @@ async def analyze_helm_chart(query: str, branch: str = "main") -> str:
         chart_name = os.path.basename(chart_path).replace(".tar.gz", "")
 
  
-        lint_input = LintChartInput(chart_path=chart_path, chart_name=chart_name)
-        lint_result = await lint_chart_tool.ainvoke(lint_input)
+        lint_result = await lint_chart_tool.ainvoke({
+        "chart_path": chart_path,
+        "chart_name": chart_name
+        })
 
         logging.info(f"[TOOL RESULT] Lint completado para {chart_name}: {lint_result}")
         return (
