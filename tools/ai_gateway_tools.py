@@ -2,9 +2,10 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 import aiohttp
 import logging
-
+import os
 GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
-AI_VENDOR = "ollama"
+
+AI_VENDOR = os.environ.get("AI_VENDOR", "ollama") #Viene del values.yaml del chart de ai-agent, es ollama o openai, ollama si no se especifica.
 
 logging.basicConfig(
     level=logging.INFO,
