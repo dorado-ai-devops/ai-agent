@@ -18,7 +18,7 @@ if not os.path.exists(f"{ssh_dir}/id_ed25519") and os.environ.get("GH_SECRET"):
 app = FastAPI()
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
-# Solo necesitas un agente global (thread-safe para peticiones independientes)
+# Agente global
 agent = initialize_agent(
     tools=tools,
     llm=llm,
@@ -34,12 +34,16 @@ async def ask(request: Request):
     if not prompt:
         return {"error": "Missing prompt"}
     try:
-        # El LLM decide la tool, igual que en tus pruebas sueltas
         result = await agent.ainvoke(prompt)
-        return {"result": result["output"]}
+        # --- DEVOLVER RESPUESTA DE TOOL SI EXISTE ---
+        if "intermediate_steps" in result and result["intermediate_steps"]:
+            # Coge el resultado de la última tool ejecutada
+            last_tool_result = result["intermediate_steps"][-1][1]
+            return {"result": last_tool_result}
+        # Si no hay steps (p.ej. solo reasoning), devuelve output
+        return {"result": result.get("output", "Sin respuesta")}
     except Exception as e:
         return {"error": str(e)}
 
-# Opcional: correr directamente con python main_api.py
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=6001, reload=True)
