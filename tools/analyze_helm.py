@@ -10,24 +10,28 @@ logging.basicConfig(
 )
 
 @tool("analyze_helm_chart")
-def analyze_helm_chart(query: str, branch: str = "main") -> str:
+async def analyze_helm_chart(query: str, branch: str = "main") -> str:
     """
     Descarga y comprime un Helm Chart del repo, y ejecuta el lint automáticamente.
     """
+    logging.info(f"[TOOL CALL] analyze_helm_chart query={query} branch={branch}")
     fetch_result = fetch_helm_chart_helper(query, branch)
 
     if "comprimido en:" not in fetch_result:
+        logging.error(f"[TOOL ERROR] Chart no encontrado o fallo al comprimir: {fetch_result}")
         return f"[ERROR] {fetch_result}"
 
     try:
         chart_path = fetch_result.split("comprimido en:")[-1].strip().replace("'", "")
         chart_name = os.path.basename(chart_path).replace(".tar.gz", "")
 
-        # LLAMA A LA TOOL USANDO .invoke()
-        lint_result = lint_chart_tool.invoke({
+        # LLAMA A LA TOOL USANDO await .ainvoke() (async)
+        lint_result = await lint_chart_tool.ainvoke({
             "chart_path": chart_path,
             "chart_name": chart_name
         })
+
+        logging.info(f"[TOOL RESULT] Lint completado para {chart_name}: {lint_result}")
         return (
             f"[FETCH RESULT]\n{fetch_result}\n\n"
             f"[LINT RESULT]\n{lint_result}"
