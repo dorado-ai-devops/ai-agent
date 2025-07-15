@@ -4,6 +4,7 @@ import aiohttp
 import logging
 
 GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
+AI_VENDOR = "openai"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,7 +22,7 @@ async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
     logging.info(f"[TOOL CALL] Tool=generate_pipeline input={input}")
     payload = {
         "description": input.description,
-        "mode": "openai",
+        "mode": AI_VENDOR,
         "caller": "ai-agent-langchain"
     }
     try:
@@ -33,6 +34,7 @@ async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
     except Exception as e:
         logging.error(f"[TOOL ERROR] Tool=generate_pipeline {e}")
         raise
+    
 # --- TOOL 2: analyze-log ---
 class AnalyzeLogInput(BaseModel):
     log: str = Field(..., description="Contenido completo del log")
@@ -43,7 +45,7 @@ async def analyze_log_tool(input: AnalyzeLogInput) -> str:
     """Analiza un log de Jenkins y devuelve un diagnóstico generado por IA."""
     payload = {
         "log": input.log,
-        "mode": "openai",
+        "mode": AI_VENDOR,
         "caller": "ai-agent-langchain"
     }
     async with aiohttp.ClientSession() as session:
@@ -69,7 +71,7 @@ async def lint_chart_tool(input: LintChartInput) -> str:
     """
     data = aiohttp.FormData()
     data.add_field("chart", open(input.chart_path, "rb"), filename=input.chart_path, content_type='application/gzip')
-    data.add_field("mode", "openai")  # <-- Siempre fijo
+    data.add_field("mode", AI_VENDOR)  # <-- Siempre fijo
     data.add_field("chart_name", input.chart_name)
     data.add_field("caller", "ai-agent-langchain")
     async with aiohttp.ClientSession() as session:
