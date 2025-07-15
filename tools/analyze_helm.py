@@ -23,8 +23,11 @@ def analyze_helm_chart(query: str, branch: str = "main") -> str:
         chart_path = fetch_result.split("comprimido en:")[-1].strip().replace("'", "")
         chart_name = os.path.basename(chart_path).replace(".tar.gz", "")
 
-        # Si lint_chart_tool es async, deberías adaptarlo o llamar vía asyncio
-        lint_result = lint_chart_tool(chart_path, chart_name)
+        # LLAMA A LA TOOL USANDO .invoke()
+        lint_result = lint_chart_tool.invoke({
+            "chart_path": chart_path,
+            "chart_name": chart_name
+        })
         return (
             f"[FETCH RESULT]\n{fetch_result}\n\n"
             f"[LINT RESULT]\n{lint_result}"
