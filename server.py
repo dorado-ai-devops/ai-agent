@@ -4,6 +4,16 @@ import uvicorn
 from langchain.agents import initialize_agent, AgentType
 from langchain_openai import ChatOpenAI
 from tools import tools
+import os
+
+ssh_dir = "/app/.ssh"
+os.makedirs(ssh_dir, exist_ok=True)
+
+# Si no existe el archivo pero la clave está en env, escríbela
+if not os.path.exists(f"{ssh_dir}/id_ed25519") and os.environ.get("GH_SECRET"):
+    with open(f"{ssh_dir}/id_ed25519", "w") as f:
+        f.write(os.environ["GH_SECRET"])
+    os.chmod(f"{ssh_dir}/id_ed25519", 0o600)
 
 app = FastAPI()
 llm = ChatOpenAI(model="gpt-4", temperature=0)
