@@ -1,5 +1,5 @@
 IMAGE_NAME=ai-agent
-VERSION=v0.3.48
+VERSION=v0.3.49
 CLUSTER_NAME=devops-ai
 REGISTRY=localhost:5000
 HELM_VALUES=../devops-ai-lab/manifests/helm-agent/values.yaml
