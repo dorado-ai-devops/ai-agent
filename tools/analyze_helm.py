@@ -28,8 +28,7 @@ async def analyze_helm_chart(query: str, branch: str = "main") -> str:
 
  
         lint_result = await lint_chart_tool.ainvoke({
-        "chart_path": chart_path,
-        "chart_name": chart_name
+            "input": {"chart_path": chart_path, "chart_name": chart_name}
         })
 
         logging.info(f"[TOOL RESULT] Lint completado para {chart_name}: {lint_result}")
