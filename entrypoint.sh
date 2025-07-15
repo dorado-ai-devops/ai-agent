@@ -2,7 +2,6 @@
 
 set -e
 
-
 SSH_DIR="/root/.ssh"
 KEY_FILE="$SSH_DIR/id_ed25519"
 
@@ -28,7 +27,9 @@ fi
 
 
 eval "$(ssh-agent -s)"
-ssh-add "$KEY_FILE"
+if [ -f "$KEY_FILE" ]; then
+    ssh-add "$KEY_FILE"
+fi
 
 
 exec python server.py
