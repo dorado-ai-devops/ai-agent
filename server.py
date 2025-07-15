@@ -24,7 +24,7 @@ agent = initialize_agent(
     llm=llm,
     agent=AgentType.OPENAI_FUNCTIONS,
     verbose=True,
-    max_iterations=1
+    max_iterations=3
 )
 
 @app.post("/ask")
