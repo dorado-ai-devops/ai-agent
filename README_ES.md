@@ -73,6 +73,7 @@ Endpoints activos:
 - `POST /analyze-log`
 - `POST /lint-chart`
 
+
 Todos los prompts, respuestas y eventos son registrados por el gateway en disco y auditados vía mensajes MCP.
 
 ---
