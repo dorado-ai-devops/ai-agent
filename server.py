@@ -37,24 +37,39 @@ async def ask(request: Request):
         result = await agent.ainvoke(prompt)
         
         if "intermediate_steps" in result and result["intermediate_steps"]:
-            last_tool_result = result["intermediate_steps"][-1][1]
-           
-            if isinstance(last_tool_result, list):
-                
+            action, last_tool_result = result["intermediate_steps"][-1]
+
+            # Lógica explícita según nombre de la herramienta usada:
+            if action.tool == "query_vector_db":
+                context_prompt = (
+                    f"Utiliza el siguiente contexto obtenido desde la base de datos vectorial para responder a la pregunta del usuario.\n\n"
+                    f"Contexto:\n{last_tool_result}\n\n"
+                    f"Pregunta del usuario:\n{prompt}\n\n"
+                    f"Respuesta:"
+                )
+                explanation = await llm.ainvoke(context_prompt)
+                return {"result": explanation.content if hasattr(explanation, "content") else explanation}
+
+            elif action.tool == "list_repositories":
                 expl_prompt = (
                     "Esta es la lista de repositorios públicos del proyecto dorado-ai-devops:\n\n"
                     + "\n".join(f"- {r}" for r in last_tool_result)
                     + "\n\nResume brevemente para un usuario DevOps: ¿qué tipo de proyectos hay y para qué sirve cada uno?"
                 )
                 explanation = await llm.ainvoke(expl_prompt)
-                
                 return {"result": explanation.content if hasattr(explanation, "content") else explanation}
+
+            # Caso por defecto: devolver resultado directamente
             else:
                 return {"result": str(last_tool_result)}
-        
+
+        # Si no hay steps (solo reasoning), devuelve output
         return {"result": result.get("output", "Sin respuesta")}
+
     except Exception as e:
         return {"error": str(e)}
+
+
 
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=6001, reload=True)

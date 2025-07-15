@@ -2,7 +2,7 @@
 
 from .ai_gateway_tools import generate_pipeline_tool, analyze_log_tool, lint_chart_tool
 from .list_repos_tool import list_github_repos
-from .get_github_readme import  get_github_r
+from .ai_vector_db import  query_vector_db
 from .analyze_helm import analyze_helm_chart
 
 tools = [
@@ -10,7 +10,7 @@ tools = [
     analyze_log_tool,
     lint_chart_tool,
     list_github_repos,
-    get_github_r,
+    query_vector_db,
     analyze_helm_chart
 
 
