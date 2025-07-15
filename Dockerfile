@@ -20,9 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia del código fuente
 COPY . .
 
-# Prepara el directorio SSH (no copies claves aquí)
-RUN mkdir -p /app/.ssh && chmod 700 /app/.ssh
-
 # Copia y da permisos al entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
