@@ -35,12 +35,23 @@ async def ask(request: Request):
         return {"error": "Missing prompt"}
     try:
         result = await agent.ainvoke(prompt)
-        # --- DEVOLVER RESPUESTA DE TOOL SI EXISTE ---
+        
         if "intermediate_steps" in result and result["intermediate_steps"]:
-            # Coge el resultado de la última tool ejecutada
             last_tool_result = result["intermediate_steps"][-1][1]
-            return {"result": last_tool_result}
-        # Si no hay steps (p.ej. solo reasoning), devuelve output
+           
+            if isinstance(last_tool_result, list):
+                
+                expl_prompt = (
+                    "Esta es la lista de repositorios públicos del proyecto dorado-ai-devops:\n\n"
+                    + "\n".join(f"- {r}" for r in last_tool_result)
+                    + "\n\nResume brevemente para un usuario DevOps: ¿qué tipo de proyectos hay y para qué sirve cada uno?"
+                )
+                explanation = await llm.ainvoke(expl_prompt)
+                
+                return {"result": explanation.content if hasattr(explanation, "content") else explanation}
+            else:
+                return {"result": str(last_tool_result)}
+        
         return {"result": result.get("output", "Sin respuesta")}
     except Exception as e:
         return {"error": str(e)}
