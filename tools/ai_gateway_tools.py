@@ -4,7 +4,7 @@ import aiohttp
 import logging
 
 GATEWAY_URL = "http://ai-gateway-service.devops-ai.svc.cluster.local:5002"
-AI_VENDOR = "openai"
+AI_VENDOR = "ollama"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,7 +18,9 @@ class GeneratePipelineInput(BaseModel):
 
 @tool("generate_pipeline")
 async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
-    """Genera un Jenkinsfile a partir de una descripción usando el microservicio de IA."""
+    """Genera un Jenkinsfile a partir de una descripción usando el microservicio ai-pipeline-gen.
+    Devuelve solo el texto del Jenkinsfile generado.
+    """
     logging.info(f"[TOOL CALL] Tool=generate_pipeline input={input}")
     payload = {
         "description": input.description,
@@ -34,7 +36,7 @@ async def generate_pipeline_tool(input: GeneratePipelineInput) -> str:
     except Exception as e:
         logging.error(f"[TOOL ERROR] Tool=generate_pipeline {e}")
         raise
-    
+
 # --- TOOL 2: analyze-log ---
 class AnalyzeLogInput(BaseModel):
     log: str = Field(..., description="Contenido completo del log")
