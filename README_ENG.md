@@ -1,30 +1,33 @@
 # 🧠 ai-agent
 
-AI reasoning agent built with **LangChain** + **OpenAI** (GPT-4).\
-Orchestrates complex DevOps tasks using LLM-based reasoning and modular tool invocation from the `devops-ai-lab` ecosystem.
+AI reasoning agent built with **LangChain** + **OpenAI GPT-4**.  
+Orchestrates complex DevOps tasks through LLM reasoning and modular tool calling from the `devops-ai-lab` ecosystem.
 
 ---
 
 ## 🎯 Purpose
 
-Centralizes LLM-driven DevOps decision logic and automation by encapsulating internal AI microservices as **tools** via `ai-gateway`.\
-Enables unified log analysis, Helm chart validation, and Jenkinsfile generation with advanced traceability and observability (MCP).
+Centralizes decision-making and DevOps automation powered by LLMs, encapsulating as **tools** the AI microservices accessible via `ai-gateway`.  
+Allows unified analysis of logs, Helm chart validation, Jenkinsfile generation, and semantic vector DB querying, with full traceability via MCP messages.
 
-This agent serves as the true cognitive entry point of the architecture.
+This agent is the real cognitive entry point of the architecture.
 
 ---
 
 ## 🔧 Functionality
 
-The agent exposes several **tools** acting as HTTP wrappers to AI microservices deployed on Kubernetes:
+The agent exposes several **tools** that act as HTTP wrappers to AI microservices deployed in Kubernetes:
 
-| Tool                | Gateway Endpoint      | Description                                                         |
-| ------------------- | --------------------- | ------------------------------------------------------------------- |
-| `generate_pipeline` | `/generate-pipeline`  | Generates Jenkinsfile from a natural language description           |
-| `analyze_log`       | `/analyze-log`        | Diagnoses and solves Jenkins/CI logs using LLM                      |
-| `lint_chart`        | `/lint-chart`         | Semantic linting of compressed Helm Charts (.tgz)                   |
+| Tool                | Endpoint Gateway     | Description                                                           |
+| -------------------|----------------------|-----------------------------------------------------------------------|
+| `generate_pipeline`| `/generate-pipeline` | Generates a Jenkinsfile from a natural language description           |
+| `analyze_log`      | `/analyze-log`       | Diagnoses Jenkins/CI logs using LLM reasoning                         |
+| `lint_chart`       | `/lint-chart`        | Semantic linting of compressed Helm Charts (.tgz)                     |
+| `analyze_helm_chart` | -                  | Downloads, compresses and runs lint on remote Helm Chart             |
+| `list_github_repos`| GitHub API           | Lists public repos from `dorado-ai-devops` for exploration            |
+| `query_vector_db`  | `/query`             | Semantic search in `ai-vector-db` to provide enriched context         |
 
-All tools inject the field `caller: ai-agent-langchain` into the payload for traceability.
+Each tool injects the field `caller: ai-agent-langchain` for audit traceability.
 
 ---
 
@@ -32,18 +35,18 @@ All tools inject the field `caller: ai-agent-langchain` into the payload for tra
 
 ```
 ai-agent/
-├── main.py                         # Entry point: runs the LangChain agent and orchestrates tools
+├── main.py                         # Entry point: LangChain agent orchestrating tools
 ├── tools/
 │   ├── __init__.py
-│   ├── ai_gateway_tools.py         # Definition and HTTP logic for each tool
+│   ├── ai_gateway_tools.py         # Tools calling HTTP endpoints
+│   ├── github_tools.py             # GitHub-based tools (e.g. repo listing)
+│   ├── vector_db_tool.py           # Vector DB semantic search tool
 ├── clients/
-│   └── gateway_client.py           # (optional, for extended HTTP client logic)
-├── chart_example/
-│   └── helm-log-analyzer-0.1.5.tgz # Example chart for linting tests
-├── config/
-│   └── settings.py
+│   └── gateway_client.py           # (optional) HTTP helper logic
 ├── prompts/
 │   └── examples.md
+├── config/
+│   └── settings.py
 ├── README.md
 ├── requirements.txt
 └── Dockerfile
@@ -60,39 +63,40 @@ pip install -r requirements.txt
 python main.py
 ```
 
-You can interact with the agent via CLI or modify the main file to run direct tests on the tools.
+You can invoke the agent via API (`POST /ask`) or adapt the code to test tools directly.
 
 ---
 
 ## 🌐 Environment Communication
 
-The agent communicates with `ai-gateway` through internal HTTP requests (Kubernetes service).\
+The agent talks to `ai-gateway` via internal Kubernetes service (`http://ai-gateway-service...`).  
 Active endpoints:
 
 - `POST /generate-pipeline`
 - `POST /analyze-log`
 - `POST /lint-chart`
+- `POST /query`
 
-All prompts, responses, and events are logged by the gateway and audited via MCP messages.
+All requests include the source caller and mode (default: `ollama`).
 
 ---
 
 ## 🧠 Intelligence & Models
 
-- **Default model:** OpenAI GPT-4 (can be switched to Mistral/Ollama by changing the config and backend microservice).
-- All tool calls use `ollama` as the default engine (configurable).
-- Future: integration of a fine-tuned model (`flan-t5` or others).
+- **Default model:** OpenAI GPT-4 (can be replaced by Mistral/Ollama or fine-tuned models).
+- All backend microservices allow setting `mode=ollama | openai` dynamically.
+- In the future: plug-in support for fine-tuned LLMs (e.g., FLAN-T5).
 
 ---
 
 ## 🔎 Observability & Traceability
 
-- **Detailed logs** at each step (start, input, result, error) in stdout (visible in Kubernetes pods).
-- **MCP**: All relevant executions are logged by `ai-gateway` through MCP messages, including metadata (caller, paths, microservice, etc).
+- **Verbose logs** for each tool call, inputs, outputs, and errors (stdout).
+- **MCP Protocol**: All key agent interactions are reported to `ai-gateway` with full metadata for audit.
 
 ---
 
-## 📦 Main Dependencies
+## 📦 Key Dependencies
 
 ```text
 langchain
@@ -102,19 +106,19 @@ pydantic
 python-dotenv
 ```
 
-> Add `ollama-client` only if you need to invoke Ollama models locally.
+> Add `ollama-client` only if running locally against Ollama models.
 
 ---
 
 ## 📌 Current Status
 
--
+Actively integrated in the `devops-ai-lab` as the reasoning and control plane for AI-assisted DevOps workflows.
 
 ---
 
 ## 👨‍💻 Author
 
-**Dani**\
+**Dani**  
 [github.com/dorado-ai-devops](https://github.com/dorado-ai-devops)
 
 ---
