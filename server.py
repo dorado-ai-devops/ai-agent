@@ -5,6 +5,7 @@ from langchain.agents import initialize_agent, AgentType
 from llm_provider import get_llm
 from langchain.memory import ConversationBufferWindowMemory
 from tools import tools
+from langchain_openai import ChatOpenAI
 import os
 
 ssh_dir = "/app/.ssh"
@@ -22,14 +23,24 @@ llm = get_llm()
 
 memory = ConversationBufferWindowMemory(k=5, return_messages=True)
 # Agente global
-agent = initialize_agent(
-    tools=tools,
-    llm=llm,
-    memory=memory,
-    agent=AgentType.OPENAI_FUNCTIONS,
-    verbose=True,
-    max_iterations=3
-)
+if isinstance(llm, ChatOpenAI):
+    agent = initialize_agent(
+        tools=tools,
+        llm=llm,
+        memory=memory,
+        agent=AgentType.OPENAI_FUNCTIONS,  
+        verbose=True,
+        max_iterations=3
+    )
+else:
+    agent = initialize_agent(
+        tools=tools,
+        llm=llm,
+        memory=memory,
+        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,  
+        verbose=True,
+        max_iterations=3
+    )
 
 @app.post("/ask")
 async def ask(request: Request):
@@ -38,6 +49,7 @@ async def ask(request: Request):
     if not prompt:
         return {"error": "Missing prompt"}
     try:
+        
         result = await agent.ainvoke(prompt)
         
         if "intermediate_steps" in result and result["intermediate_steps"]:
