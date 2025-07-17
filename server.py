@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 import asyncio
 import uvicorn
 from langchain.agents import initialize_agent, AgentType
-from langchain_openai import ChatOpenAI
+from llm_provider import get_llm
 from langchain.memory import ConversationBufferWindowMemory
 from tools import tools
 import os
@@ -17,7 +17,7 @@ if not os.path.exists(f"{ssh_dir}/id_ed25519") and os.environ.get("GH_SECRET"):
     os.chmod(f"{ssh_dir}/id_ed25519", 0o600)
 
 app = FastAPI()
-llm = ChatOpenAI(model="gpt-4", temperature=0)
+llm = get_llm()
 memory = ConversationBufferWindowMemory(k=5, return_messages=True)
 # Agente global
 agent = initialize_agent(

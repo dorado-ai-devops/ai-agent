@@ -1,5 +1,5 @@
 IMAGE_NAME     := ai-agent
-VERSION        := v1.0.0
+VERSION        := v1.0.1
 REGISTRY       := localhost:5000
 HELM_VALUES    := ../devops-ai-lab/manifests/helm-agent/values.yaml
 ARGO_APP_NAME  := ai-agent
