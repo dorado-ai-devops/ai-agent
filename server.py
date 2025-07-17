@@ -64,6 +64,7 @@ async def ask(request: Request):
                     f"Respuesta:"
                 )
                 explanation = await llm.ainvoke(context_prompt)
+                print(explanation)
                 return {"result": explanation.content if hasattr(explanation, "content") else explanation}
 
             elif action.tool == "list_repositories":
@@ -73,6 +74,7 @@ async def ask(request: Request):
                     + "\n\nResume brevemente para un usuario DevOps: ¿qué tipo de proyectos hay y para qué sirve cada uno?"
                 )
                 explanation = await llm.ainvoke(expl_prompt)
+                print(explanation)
                 return {"result": explanation.content if hasattr(explanation, "content") else explanation}
 
             # Caso por defecto: devolver resultado directamente
