@@ -12,7 +12,5 @@ tools = [
     list_github_repos,
     query_vector_db,
     analyze_helm_chart
-
-
 ]
 

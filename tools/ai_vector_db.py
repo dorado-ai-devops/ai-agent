@@ -10,8 +10,8 @@ logging.basicConfig(
 @tool("query_vector_db")
 def query_vector_db(query: str) -> str:
     """
-    Realiza una búsqueda semántica en ai-vector-db y devuelve resultados relevantes.
-    query: consulta en lenguaje natural para recuperar contexto semántico
+    Realiza busquedas de información sobre el proyecto y sus partes, da contexto de su creador y devuelve resultados relevantes relacionados, usa una base de datos de vectores.
+    query: consulta en lenguaje natural para recuperar contexto
     """
     url = "http://ai-vector-bd.devops-ai.svc.cluster.local:8888/query"
     logging.info(f"[TOOL CALL] Tool=query_vector_db url={url} query={query}")

@@ -45,7 +45,7 @@ class AnalyzeLogInput(BaseModel):
 
 @tool("analyze_log")
 async def analyze_log_tool(input: AnalyzeLogInput) -> str:
-    """Analiza un log de Jenkins y devuelve un diagnóstico generado por IA."""
+    """Analiza un log y devuelve un diagnósticom, trata de inferir el contexto y posibles errores, enviando el log completo al microservicio de análisis de logs."""
     payload = {
         "log": input.log,
         "mode": AI_VENDOR,
