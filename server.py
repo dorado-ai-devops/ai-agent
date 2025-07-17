@@ -51,7 +51,7 @@ async def ask(request: Request):
     try:
         
         result = await agent.ainvoke(prompt)
-        
+        print(result)
         if "intermediate_steps" in result and result["intermediate_steps"]:
             action, last_tool_result = result["intermediate_steps"][-1]
 
