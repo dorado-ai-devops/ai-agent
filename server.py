@@ -6,20 +6,27 @@ from llm_provider import get_llm
 from langchain.memory import ConversationBufferWindowMemory
 from tools import tools
 import os
+import logging
 
+# Asegúrate de tener los logs configurados
+logging.basicConfig(level=logging.INFO)
+
+# Directorio para claves SSH
 ssh_dir = "/app/.ssh"
 os.makedirs(ssh_dir, exist_ok=True)
 
-
+# Si no existe la clave, la crea a partir de un secreto en el entorno
 if not os.path.exists(f"{ssh_dir}/id_ed25519") and os.environ.get("GH_SECRET"):
     with open(f"{ssh_dir}/id_ed25519", "w") as f:
         f.write(os.environ["GH_SECRET"])
     os.chmod(f"{ssh_dir}/id_ed25519", 0o600)
 
+# Inicialización de FastAPI
 app = FastAPI()
-llm = get_llm()
+llm = get_llm()  # Obtiene el modelo LLM dinámicamente
 memory = ConversationBufferWindowMemory(k=5, return_messages=True)
-# Agente global
+
+# Agente global de LangChain
 agent = initialize_agent(
     tools=tools,
     llm=llm,
@@ -31,17 +38,22 @@ agent = initialize_agent(
 
 @app.post("/ask")
 async def ask(request: Request):
+    # Obtener prompt
     data = await request.json()
     prompt = data.get("prompt")
+    
     if not prompt:
         return {"error": "Missing prompt"}
+    
     try:
+        # Ejecutar  agente
         result = await agent.ainvoke(prompt)
         
+        # Verificar si existen pasos intermedios
         if "intermediate_steps" in result and result["intermediate_steps"]:
             action, last_tool_result = result["intermediate_steps"][-1]
 
-            # Lógica explícita según nombre de la herramienta usada:
+            
             if action.tool == "query_vector_db":
                 context_prompt = (
                     f"Utiliza el siguiente contexto para responder a la pregunta del usuario.\n\n"
@@ -61,17 +73,14 @@ async def ask(request: Request):
                 explanation = await llm.ainvoke(expl_prompt)
                 return {"result": explanation.content if hasattr(explanation, "content") else explanation}
 
-            # Caso por defecto: devolver resultado directamente
+            
             else:
                 return {"result": str(last_tool_result)}
 
-        # Si no hay steps (solo reasoning), devuelve output
         return {"result": result.get("output", "Sin respuesta")}
 
     except Exception as e:
         return {"error": str(e)}
-
-
 
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=6001, reload=True)
