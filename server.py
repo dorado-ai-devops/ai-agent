@@ -3,6 +3,7 @@ import asyncio
 import uvicorn
 from langchain.agents import initialize_agent, AgentType
 from langchain_openai import ChatOpenAI
+from langchain.memory import ConversationBufferWindowMemory
 from tools import tools
 import os
 
@@ -17,11 +18,12 @@ if not os.path.exists(f"{ssh_dir}/id_ed25519") and os.environ.get("GH_SECRET"):
 
 app = FastAPI()
 llm = ChatOpenAI(model="gpt-4", temperature=0)
-
+memory = ConversationBufferWindowMemory(k=5, return_messages=True)
 # Agente global
 agent = initialize_agent(
     tools=tools,
     llm=llm,
+    memory=memory,
     agent=AgentType.OPENAI_FUNCTIONS,
     verbose=True,
     max_iterations=3
@@ -42,7 +44,7 @@ async def ask(request: Request):
             # Lógica explícita según nombre de la herramienta usada:
             if action.tool == "query_vector_db":
                 context_prompt = (
-                    f"Utiliza el siguiente contexto obtenido desde la base de datos vectorial para responder a la pregunta del usuario.\n\n"
+                    f"Utiliza el siguiente contexto para responder a la pregunta del usuario.\n\n"
                     f"Contexto:\n{last_tool_result}\n\n"
                     f"Pregunta del usuario:\n{prompt}\n\n"
                     f"Respuesta:"
