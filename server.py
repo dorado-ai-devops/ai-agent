@@ -46,7 +46,7 @@ else:
         tools=tools,
         llm=llm,
         memory=memory,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,  
+        agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
         verbose=True,
         max_iterations=3
     )
