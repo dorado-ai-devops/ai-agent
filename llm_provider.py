@@ -3,6 +3,7 @@ import logging
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 
+
 def get_llm():
     ai_vendor = os.environ.get("AI_VENDOR", "ollama").lower()
     llm_model = os.environ.get("LLM_MODEL", "mistral").lower()
