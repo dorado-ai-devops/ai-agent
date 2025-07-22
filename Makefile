@@ -9,7 +9,7 @@ ARGO_APP_NAME  := ai-agent
 all: release
 
 build:
-	docker build --no-cache -t $(IMAGE_NAME):$(VERSION) .
+	docker build  -t $(IMAGE_NAME):$(VERSION) .
 
 tag: build
 	docker tag $(IMAGE_NAME):$(VERSION) $(REGISTRY)/$(IMAGE_NAME):$(VERSION)
